@@ -1,4 +1,4 @@
-# JorgeSTREAM Broadcast Studio 🎙️
+# JorgeSTREAM Broadcast Studio 
 
 A professional web-based broadcast streaming studio with integrated radio player, audio monitoring, and server management capabilities.
 
@@ -7,7 +7,7 @@ A professional web-based broadcast streaming studio with integrated radio player
 ![Vite](https://img.shields.io/badge/Vite-5.0.0-646cff)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-## 🌟 Features
+## Features
 
 ### Broadcast Studio
 - **Real-time Audio Monitoring** - Professional VU meters and waveform visualization
@@ -33,7 +33,7 @@ A professional web-based broadcast streaming studio with integrated radio player
 - **Local Storage** - Persists user preferences and favorites
 - **Error Handling** - Graceful error recovery and user feedback
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
