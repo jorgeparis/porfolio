@@ -1,0 +1,244 @@
+.mini-player {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 10000;
+  background: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 60px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.mini-player:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 255, 136, 0.2);
+  border-color: rgba(0, 255, 136, 0.5);
+}
+
+.mini-player.expanded {
+  border-radius: 20px;
+  min-width: 320px;
+}
+
+.mini-player-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  position: relative;
+}
+
+/* Station Info */
+.mini-player-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.mini-player-icon {
+  position: relative;
+}
+
+.mini-vinyl {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: miniSpin 2s linear infinite;
+  animation-play-state: paused;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+.mini-vinyl::before {
+  content: "";
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #333;
+}
+
+.mini-vinyl-center {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #00ff88;
+  z-index: 1;
+}
+
+@keyframes miniSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.mini-player-details {
+  flex: 1;
+}
+
+.mini-station-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mini-station-meta {
+  font-size: 11px;
+  color: #888;
+  margin-top: 2px;
+}
+
+/* Controls */
+.mini-player-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mini-control-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.mini-control-btn:hover {
+  transform: scale(1.1);
+  background: #00ff88;
+  color: #000;
+  border-color: #00ff88;
+}
+
+.mini-control-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mini-control-btn:disabled:hover {
+  transform: none;
+  background: #2a2a2a;
+  color: #fff;
+}
+
+/* Volume Control */
+.mini-volume-container {
+  position: relative;
+}
+
+.mini-volume-slider-container {
+  position: absolute;
+  bottom: 45px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 12px 8px;
+  border-radius: 30px;
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.mini-volume-slider {
+  width: 4px;
+  height: 80px;
+  -webkit-appearance: slider-vertical;
+  appearance: slider-vertical;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.mini-volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #00ff88;
+  cursor: pointer;
+}
+
+/* Visualizer */
+.mini-visualizer {
+  width: 60px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mini-visualizer-bars {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2px;
+  width: 100%;
+  height: 100%;
+}
+
+.mini-visualizer-bar {
+  flex: 1;
+  transition: height 0.1s ease;
+  border-radius: 2px;
+}
+
+/* Open Radio Button */
+.open-radio-btn {
+  text-decoration: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .mini-player.expanded {
+    min-width: 280px;
+  }
+
+  .mini-station-name {
+    max-width: 140px;
+    font-size: 12px;
+  }
+
+  .mini-visualizer {
+    width: 40px;
+  }
+
+  .mini-visualizer-bars {
+    gap: 1px;
+  }
+}
+
+/* Animation for new station */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.mini-player {
+  animation: slideInRight 0.3s ease;
+}
