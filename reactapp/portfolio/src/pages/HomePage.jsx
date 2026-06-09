@@ -7,7 +7,6 @@ import ServerConfig from "../components/ServerConfig";
 import { useAudioMeter } from "../hooks/useAudioMeter";
 import "../styles/HomePage.css"; // Add this at the top
 
-
 function HomePage() {
   // Server Configuration State
   const [protocol, setProtocol] = useState("icecast");

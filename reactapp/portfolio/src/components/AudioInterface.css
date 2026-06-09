@@ -1,0 +1,267 @@
+/* AudioInterface.css */
+.audio-card {
+    width: 100%;
+    max-width: 600px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+  }
+  
+  .card-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 1.1em;
+  }
+  
+  .scan-btn {
+    cursor: pointer;
+    padding: 6px 12px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    font-size: 0.85em;
+  }
+  
+  .scan-btn:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.05);
+  }
+  
+  .device-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.2);
+  }
+  
+  .device-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    position: relative;
+  }
+  
+  .device-item:hover {
+    background: rgba(255,255,255,0.1);
+  }
+  
+  .device-item.selected {
+    background: rgba(255,255,255,0.15);
+    border-left-color: #4caf50;
+  }
+  
+  .device-icon {
+    margin-right: 12px;
+    opacity: 0.7;
+  }
+  
+  .device-info {
+    flex: 1;
+  }
+  
+  .device-name {
+    font-size: 0.9em;
+    font-weight: 500;
+  }
+  
+  .device-group {
+    font-size: 0.7em;
+    opacity: 0.6;
+    margin-top: 2px;
+  }
+  
+  .device-check {
+    color: #4caf50;
+    font-weight: bold;
+  }
+  
+  .audio-meter-container {
+    margin: 15px 0;
+    padding: 10px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+  }
+  
+  .meter-label {
+    font-size: 0.8em;
+    margin-bottom: 8px;
+    opacity: 0.8;
+  }
+  
+  .audio-meter {
+    height: 30px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 5px;
+  }
+  
+  .meter-level {
+    height: 100%;
+    transition: width 0.05s linear;
+    background: linear-gradient(90deg, #4caf50, #ff9800, #f44336);
+  }
+  
+  .meter-peak {
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: white;
+    transition: left 0.05s linear;
+    box-shadow: 0 0 2px rgba(255,255,255,0.8);
+  }
+  
+  .meter-values {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7em;
+    opacity: 0.6;
+    padding: 0 5px;
+  }
+  
+  .settings-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .row2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .field label {
+    font-size: 0.8em;
+    font-weight: 500;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .field select {
+    padding: 8px 10px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 6px;
+    color: white;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .field select:hover {
+    background: rgba(0,0,0,0.4);
+    border-color: rgba(255,255,255,0.3);
+  }
+  
+  .field select:focus {
+    outline: none;
+    border-color: #4caf50;
+  }
+  
+  .checkbox-field {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.85em;
+  }
+  
+  .checkbox-label input[type="checkbox"] {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+  }
+  
+  .processing-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    padding: 12px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px;
+  }
+  
+  .settings-summary {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    font-size: 0.75em;
+    opacity: 0.7;
+  }
+  
+  .summary-item {
+    padding: 4px 8px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 4px;
+  }
+  
+  .sep {
+    height: 1px;
+    background: rgba(255,255,255,0.2);
+    margin: 15px 0;
+  }
+  
+  /* Scrollbar styling */
+  .device-list::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .device-list::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.2);
+    border-radius: 3px;
+  }
+  
+  .device-list::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+  }
+  
+  .device-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.5);
+  }
+  
+  /* Responsive */
+  @media (max-width: 480px) {
+    .row2 {
+      grid-template-columns: 1fr;
+    }
+    
+    .processing-controls {
+      grid-template-columns: 1fr;
+    }
+    
+    .settings-summary {
+      flex-direction: column;
+      gap: 8px;
+    }
+  }

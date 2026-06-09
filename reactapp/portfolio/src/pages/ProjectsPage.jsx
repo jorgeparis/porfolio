@@ -80,6 +80,76 @@ const ProjectsPage = () => {
       country: "angola",
       title: "Luanda Metro Network",
       desc: "City-wide fiber optic ring"
+    },
+    {
+      filename: "studio-angola-01.jpg",
+      category: "studio",
+      country: "angola",
+      title: "Radio Studio Build",
+      desc: "Full broadcast setup with IceCast integration"
+    },
+    {
+      filename: "studio-angola-02.jpg",
+      category: "studio",
+      country: "angola",
+      title: "Angola Studio",
+      desc: "Professional audio installation and acoustic treatment"
+    },
+    {
+      filename: "network-nigeria-01.jpg",
+      category: "network",
+      country: "nigeria",
+      title: "Enterprise Network",
+      desc: "Structured cabling + routing for corporate campus"
+    },
+    {
+      filename: "network-ghana-01.jpg",
+      category: "network",
+      country: "ghana",
+      title: "Ghana Network",
+      desc: "Fiber optic backbone deployment"
+    },
+    {
+      filename: "telecom-angola-01.jpg",
+      category: "telecom",
+      country: "angola",
+      title: "Microwave Link",
+      desc: "Long distance communication for remote areas"
+    },
+    {
+      filename: "studio-mozambique-01.jpg",
+      category: "studio",
+      country: "mozambique",
+      title: "Maputo Studio",
+      desc: "Digital broadcast center with ShoutCast"
+    },
+    {
+      filename: "network-kenya-01.jpg",
+      category: "network",
+      country: "kenya",
+      title: "Nairobi Data Center",
+      desc: "High availability network infrastructure"
+    },
+    {
+      filename: "telecom-southafrica-01.jpg",
+      category: "telecom",
+      country: "southafrica",
+      title: "Satellite Uplink",
+      desc: "Teleport facility with redundant links"
+    },
+    {
+      filename: "studio-brazil-01.jpg",
+      category: "studio",
+      country: "brazil",
+      title: "São Paulo Studio",
+      desc: "24/7 broadcast operations center"
+    },
+    {
+      filename: "network-angola-01.jpg",
+      category: "network",
+      country: "angola",
+      title: "Luanda Metro Network",
+      desc: "City-wide fiber optic ring"
     }
   ];
 
