@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Navbar from "../components/Navbar";
 import { useRadio } from "../context/RadioContext";
 import "./RadioPage.css";
@@ -155,9 +155,14 @@ const NowPlayingBar = ({ station, isPlaying, onClose }) => {
       <div className="now-playing-content">
         <div className="now-playing-info">
           <div className="now-playing-animation">
-            {isPlaying && <div className="audio-wave">
-              <span></span><span></span><span></span><span></span>
-            </div>}
+            {isPlaying && (
+              <div className="audio-wave">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            )}
           </div>
           <div className="now-playing-details">
             <div className="now-playing-label">NOW PLAYING</div>
@@ -168,14 +173,23 @@ const NowPlayingBar = ({ station, isPlaying, onClose }) => {
             </div>
           </div>
         </div>
-        <button className="close-now-playing" onClick={onClose}>✕</button>
+        <button className="close-now-playing" onClick={onClose}>
+          ✕
+        </button>
       </div>
     </div>
   );
 };
 
 // Quick Access Section Component
-const QuickAccessSection = ({ title, stations, onPlayStation, currentStation, isPlaying, type }) => {
+const QuickAccessSection = ({
+  title,
+  stations,
+  onPlayStation,
+  currentStation,
+  isPlaying,
+  type
+}) => {
   if (stations.length === 0) return null;
 
   return (
@@ -186,12 +200,14 @@ const QuickAccessSection = ({ title, stations, onPlayStation, currentStation, is
       </div>
       <div className="quick-access-grid">
         {stations.slice(0, 6).map((station) => (
-          <div 
-            key={station.src} 
-            className={`quick-access-card ${currentStation?.src === station.src && isPlaying ? "active" : ""}`}
+          <div
+            key={station.src}
+            className={`quick-access-card ${
+              currentStation?.src === station.src && isPlaying ? "active" : ""
+            }`}
             onClick={() => onPlayStation(station)}
           >
-            <div className="quick-access-icon">📻</div>
+            <div className="quick-access-icon"></div>
             <div className="quick-access-info">
               <div className="quick-access-name">{station.name}</div>
               <div className="quick-access-genre">{station.genre}</div>
@@ -227,34 +243,53 @@ function RadioPage() {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
   // Get unique genres and countries
-  const genres = useMemo(() => ["All", ...new Set(radioStations.map((s) => s.genre))], []);
-  const countries = useMemo(() => ["All", ...new Set(radioStations.map((s) => s.country))], []);
+  const genres = useMemo(
+    () => ["All", ...new Set(radioStations.map((s) => s.genre))],
+    []
+  );
+  const countries = useMemo(
+    () => ["All", ...new Set(radioStations.map((s) => s.country))],
+    []
+  );
 
   // Get recent stations (last 5)
-  const recentStationsList = useMemo(() => recentStations.slice(0, 6), [recentStations]);
+  const recentStationsList = useMemo(
+    () => recentStations.slice(0, 6),
+    [recentStations]
+  );
 
   // Filter stations
   const filteredStations = useMemo(() => {
     let stations = radioStations;
-    
+
     if (showFavoritesOnly) {
-      stations = stations.filter(station => favorites.some(f => f.src === station.src));
+      stations = stations.filter((station) =>
+        favorites.some((f) => f.src === station.src)
+      );
     }
-    
+
     return stations.filter((station) => {
       const matchesSearch = station.name
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
-      const matchesGenre = selectedGenre === "All" || station.genre === selectedGenre;
-      const matchesCountry = selectedCountry === "All" || station.country === selectedCountry;
+      const matchesGenre =
+        selectedGenre === "All" || station.genre === selectedGenre;
+      const matchesCountry =
+        selectedCountry === "All" || station.country === selectedCountry;
       return matchesSearch && matchesGenre && matchesCountry;
     });
-  }, [searchTerm, selectedGenre, selectedCountry, showFavoritesOnly, favorites]);
+  }, [
+    searchTerm,
+    selectedGenre,
+    selectedCountry,
+    showFavoritesOnly,
+    favorites
+  ]);
 
   // Group stations by genre for genre view
   const stationsByGenre = useMemo(() => {
     const grouped = {};
-    filteredStations.forEach(station => {
+    filteredStations.forEach((station) => {
       if (!grouped[station.genre]) {
         grouped[station.genre] = [];
       }
@@ -266,22 +301,25 @@ function RadioPage() {
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e) => {
-      if (e.key === 'Escape' && currentStation) {
+      if (e.key === "Escape" && currentStation) {
         stopPlayback();
       }
-      if (e.ctrlKey && e.key === 'f') {
+      if (e.ctrlKey && e.key === "f") {
         e.preventDefault();
-        document.querySelector('.search-input')?.focus();
+        document.querySelector(".search-input")?.focus();
       }
     };
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
   }, [currentStation, stopPlayback]);
 
-  const handlePlayStation = useCallback((station) => {
-    playStation(station);
-    setShowNowPlaying(true);
-  }, [playStation]);
+  const handlePlayStation = useCallback(
+    (station) => {
+      playStation(station);
+      setShowNowPlaying(true);
+    },
+    [playStation]
+  );
 
   const handleCloseNowPlaying = useCallback(() => {
     setShowNowPlaying(false);
@@ -290,32 +328,34 @@ function RadioPage() {
   return (
     <div className="radio-page">
       <Navbar />
-      
+
       {/* Now Playing Bar */}
       {showNowPlaying && (
-        <NowPlayingBar 
-          station={currentStation} 
+        <NowPlayingBar
+          station={currentStation}
           isPlaying={isPlaying}
           onClose={handleCloseNowPlaying}
         />
       )}
-      
+
       <div className="radio-container">
         <div className="radio-header">
           <div>
-            <h1>📻 Radio Stations</h1>
-            <p className="radio-subtitle">Discover and listen to live radio streams</p>
+            <h1>Radio Stations</h1>
+            <p className="radio-subtitle">
+              Discover and listen to live radio streams
+            </p>
           </div>
           <div className="header-actions">
-            <button 
-              className={`view-mode-btn ${viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => setViewMode('grid')}
+            <button
+              className={`view-mode-btn ${viewMode === "grid" ? "active" : ""}`}
+              onClick={() => setViewMode("grid")}
             >
               ▦ Grid
             </button>
-            <button 
-              className={`view-mode-btn ${viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => setViewMode('list')}
+            <button
+              className={`view-mode-btn ${viewMode === "list" ? "active" : ""}`}
+              onClick={() => setViewMode("list")}
             >
               ☰ List
             </button>
@@ -325,7 +365,7 @@ function RadioPage() {
         {/* Search and Filters */}
         <div className="search-filters">
           <div className="search-bar">
-            <span className="search-icon">🔍</span>
+            <span className="search-icon"></span>
             <input
               type="text"
               placeholder="Search stations... (Ctrl+F)"
@@ -334,10 +374,15 @@ function RadioPage() {
               className="search-input"
             />
             {searchTerm && (
-              <button className="clear-search" onClick={() => setSearchTerm("")}>✕</button>
+              <button
+                className="clear-search"
+                onClick={() => setSearchTerm("")}
+              >
+                ✕
+              </button>
             )}
           </div>
-          
+
           <div className="filter-controls">
             <select
               value={selectedGenre}
@@ -346,11 +391,11 @@ function RadioPage() {
             >
               {genres.map((genre) => (
                 <option key={genre} value={genre}>
-                  🏷️ {genre}
+                  {genre}
                 </option>
               ))}
             </select>
-            
+
             <select
               value={selectedCountry}
               onChange={(e) => setSelectedCountry(e.target.value)}
@@ -358,16 +403,18 @@ function RadioPage() {
             >
               {countries.map((country) => (
                 <option key={country} value={country}>
-                  🌍 {country}
+                  {country}
                 </option>
               ))}
             </select>
-            
-            <button 
-              className={`favorite-filter-btn ${showFavoritesOnly ? 'active' : ''}`}
+
+            <button
+              className={`favorite-filter-btn ${
+                showFavoritesOnly ? "active" : ""
+              }`}
               onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
             >
-              ❤️ {showFavoritesOnly ? 'Showing Favorites' : 'Show Favorites'}
+              {showFavoritesOnly ? "Showing Favorites" : "Show Favorites"}
             </button>
           </div>
         </div>
@@ -398,56 +445,68 @@ function RadioPage() {
         {error && <div className="error-message">⚠️ {error}</div>}
 
         {/* Quick Access Sections */}
-        {!showFavoritesOnly && searchTerm === "" && selectedGenre === "All" && selectedCountry === "All" && (
-          <>
-            {recentStationsList.length > 0 && (
-              <QuickAccessSection 
-                title="🕒 Recently Played"
-                stations={recentStationsList}
-                onPlayStation={handlePlayStation}
-                currentStation={currentStation}
-                isPlaying={isPlaying}
-                type="recent"
-              />
-            )}
-            
-            {favorites.length > 0 && (
-              <QuickAccessSection 
-                title="❤️ Your Favorites"
-                stations={favorites}
-                onPlayStation={handlePlayStation}
-                currentStation={currentStation}
-                isPlaying={isPlaying}
-                type="favorite"
-              />
-            )}
-          </>
-        )}
+        {!showFavoritesOnly &&
+          searchTerm === "" &&
+          selectedGenre === "All" &&
+          selectedCountry === "All" && (
+            <>
+              {recentStationsList.length > 0 && (
+                <QuickAccessSection
+                  title="Recently Played"
+                  stations={recentStationsList}
+                  onPlayStation={handlePlayStation}
+                  currentStation={currentStation}
+                  isPlaying={isPlaying}
+                  type="recent"
+                />
+              )}
+
+              {favorites.length > 0 && (
+                <QuickAccessSection
+                  title="Your Favorites"
+                  stations={favorites}
+                  onPlayStation={handlePlayStation}
+                  currentStation={currentStation}
+                  isPlaying={isPlaying}
+                  type="favorite"
+                />
+              )}
+            </>
+          )}
 
         {/* Main Stations Display */}
         <div className="stations-section">
           <div className="section-header">
             <h2>
-              {showFavoritesOnly ? "⭐ Favorite Stations" : 
-               searchTerm ? `🔍 Search Results for "${searchTerm}"` : 
-               selectedGenre !== "All" ? `🎵 ${selectedGenre} Stations` :
-               selectedCountry !== "All" ? `🌍 Stations in ${selectedCountry}` :
-               "🎧 All Stations"}
+              {showFavoritesOnly
+                ? " Favorite Stations"
+                : searchTerm
+                ? ` Search Results for "${searchTerm}"`
+                : selectedGenre !== "All"
+                ? ` ${selectedGenre} Stations`
+                : selectedCountry !== "All"
+                ? ` Stations in ${selectedCountry}`
+                : "🎧 All Stations"}
             </h2>
-            <span className="section-count">{filteredStations.length} stations</span>
+            <span className="section-count">
+              {filteredStations.length} stations
+            </span>
           </div>
 
           {filteredStations.length === 0 && (
             <div className="no-results">
-              <div className="no-results-icon">🔍</div>
+              <div className="no-results-icon"></div>
               <h3>No stations found</h3>
               <p>Try adjusting your search or filters</p>
-              <button onClick={() => {
-                setSearchTerm("");
-                setSelectedGenre("All");
-                setSelectedCountry("All");
-                setShowFavoritesOnly(false);
-              }} className="reset-filters-btn">
+              <button
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedGenre("All");
+                  setSelectedCountry("All");
+                  setShowFavoritesOnly(false);
+                }}
+                className="reset-filters-btn"
+              >
                 Reset Filters
               </button>
             </div>
@@ -458,15 +517,19 @@ function RadioPage() {
               {filteredStations.map((station) => (
                 <div key={station.src} className="station-card">
                   <div className="station-card-header">
-                    <div className="station-icon">📻</div>
+                    <div className="station-icon"></div>
                     <button
                       className={`favorite-btn-card ${
-                        favorites.some((f) => f.src === station.src) ? "active" : ""
+                        favorites.some((f) => f.src === station.src)
+                          ? "active"
+                          : ""
                       }`}
                       onClick={() => toggleFavorite(station)}
                       aria-label="Toggle favorite"
                     >
-                      {favorites.some((f) => f.src === station.src) ? "❤️" : "🤍"}
+                      {favorites.some((f) => f.src === station.src)
+                        ? "❤️"
+                        : "🤍"}
                     </button>
                   </div>
                   <div className="station-card-body">
@@ -485,10 +548,14 @@ function RadioPage() {
                       }`}
                       onClick={() => handlePlayStation(station)}
                       disabled={isLoading}
-                      aria-label={currentStation?.src === station.src && isPlaying ? "Stop" : "Play"}
+                      aria-label={
+                        currentStation?.src === station.src && isPlaying
+                          ? "Stop"
+                          : "Play"
+                      }
                     >
                       {isLoading && currentStation?.src === station.src
-                        ? "⏳"
+                        ? ""
                         : currentStation?.src === station.src && isPlaying
                         ? "⏸"
                         : "▶"}
@@ -507,35 +574,43 @@ function RadioPage() {
             <div className="stations-list">
               {filteredStations.map((station) => (
                 <div key={station.src} className="station-list-item">
-                  <div className="list-item-icon">📻</div>
+                  <div className="list-item-icon"></div>
                   <div className="list-item-info">
                     <div className="list-item-name">{station.name}</div>
                     <div className="list-item-meta">
                       <span className="genre-tag-small">{station.genre}</span>
-                      <span className="country-tag-small">{station.country}</span>
+                      <span className="country-tag-small">
+                        {station.country}
+                      </span>
                     </div>
                   </div>
                   <div className="list-item-actions">
                     <button
                       className={`play-list-btn ${
-                        currentStation?.src === station.src && isPlaying ? "playing" : ""
+                        currentStation?.src === station.src && isPlaying
+                          ? "playing"
+                          : ""
                       }`}
                       onClick={() => handlePlayStation(station)}
                       disabled={isLoading}
                     >
                       {isLoading && currentStation?.src === station.src
-                        ? "⏳"
+                        ? ""
                         : currentStation?.src === station.src && isPlaying
                         ? "⏸"
                         : "▶"}
                     </button>
                     <button
                       className={`favorite-list-btn ${
-                        favorites.some((f) => f.src === station.src) ? "active" : ""
+                        favorites.some((f) => f.src === station.src)
+                          ? "active"
+                          : ""
                       }`}
                       onClick={() => toggleFavorite(station)}
                     >
-                      {favorites.some((f) => f.src === station.src) ? "❤️" : "🤍"}
+                      {favorites.some((f) => f.src === station.src)
+                        ? "❤️"
+                        : "🤍"}
                     </button>
                   </div>
                 </div>
