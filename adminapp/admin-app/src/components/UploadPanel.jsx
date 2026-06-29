@@ -117,7 +117,7 @@ function UploadPanel({
           const result = JSON.parse(xhr.responseText);
           setUploadProgress(100);
           setUploadStatus(
-            `✅ Success! Project "${result.project.title}" uploaded with ${result.images_count} image(s)`
+            `Success! Project "${result.project.title}" uploaded with ${result.images_count} image(s)`
           );
           setTimeout(() => resetForm(), 4000);
         } catch (error) {

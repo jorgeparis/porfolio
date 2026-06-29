@@ -2,27 +2,100 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Navbar from "../components/Navbar";
 import projectService from "../services/projectService";
+import "../styles/projects.css";
+
+// ─── Pure helpers (outside component — no deps on React state) ───────────────
+
+const FILTERS = [
+  { value: "all", label: "All" },
+  { value: "studio", label: "Studios" },
+  { value: "network", label: "Networking" },
+  { value: "telecom", label: "Telecom" }
+];
+
+/**
+ * Resolve the best available URL from an image object.
+ * Priority: full_url → file_path → url → placeholder
+ */
+const resolveImageUrl = (image, fallback = "/api/placeholder/400/300") => {
+  if (!image) return fallback;
+  if (image.full_url) return image.full_url;
+  if (image.file_path) return projectService.getImageUrl(image.file_path);
+  if (image.url) return projectService.getImageUrl(image.url);
+  return fallback;
+};
+
+/**
+ * Return all images for a project, always as an array.
+ */
+const getAllImagesFromProject = (project) => {
+  if (project.images && project.images.length > 0) return project.images;
+  if (project.primary_image) return [project.primary_image];
+  return [];
+};
+
+/**
+ * Return the URL for a project's cover image (primary or first image).
+ */
+const getProjectCoverUrl = (project) => {
+  if (project.primary_image) return resolveImageUrl(project.primary_image);
+  const images = getAllImagesFromProject(project);
+  return images.length > 0
+    ? resolveImageUrl(images[0])
+    : "/api/placeholder/400/300";
+};
+
+/**
+ * Group an array of projects by country, sorted alphabetically.
+ */
+const groupByCountry = (projects) => {
+  const groups = {};
+  projects.forEach((project) => {
+    const key = (project.country || "unknown").toUpperCase();
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(project);
+  });
+
+  return Object.keys(groups)
+    .sort()
+    .reduce((sorted, key) => {
+      sorted[key] = groups[key];
+      return sorted;
+    }, {});
+};
+
+// ─── Shared shell ─────────────────────────────────────────────────────────────
+
+const PageShell = ({ children }) => (
+  <div className="projects-page">
+    <Navbar />
+    {children}
+  </div>
+);
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 const ProjectsPage = () => {
   const [filter, setFilter] = useState("all");
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentProjectIndex, setCurrentProjectIndex] = useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [currentProjects, setCurrentProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const startX = useRef(0);
+  const touchStartX = useRef(0);
+
+  // ── Data fetching ────────────────────────────────────────────────────────────
 
   const fetchProjects = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
     try {
       const projects = await projectService.getGalleryProjects(filter);
-      console.log("Fetched projects:", projects);
       setCurrentProjects(projects);
-    } catch (error) {
-      console.error("Error fetching projects:", error);
-      setError(error.message);
+    } catch (err) {
+      console.error("Error fetching projects:", err);
+      setError(err.message || "Failed to load projects");
     } finally {
       setLoading(false);
     }
@@ -32,119 +105,159 @@ const ProjectsPage = () => {
     fetchProjects();
   }, [fetchProjects]);
 
-  const groupByCountry = useCallback((projects) => {
-    const groups = {};
-    projects.forEach((project) => {
-      const countryName = (project.country || "unknown").toUpperCase();
-      if (!groups[countryName]) {
-        groups[countryName] = [];
-      }
-      groups[countryName].push(project);
-    });
-    
-    // Sort countries alphabetically
-    const sortedGroups = {};
-    Object.keys(groups)
-      .sort()
-      .forEach(key => {
-        sortedGroups[key] = groups[key];
-      });
-    return sortedGroups;
-  }, []);
+  // ── Lightbox helpers ─────────────────────────────────────────────────────────
 
-  const getProjectImageUrl = (project) => {
-    // Priority: primary_image -> first image -> placeholder
-    if (project.primary_image) {
-      if (project.primary_image.full_url) {
-        return project.primary_image.full_url;
+  const openLightbox = useCallback(
+    (projectId) => {
+      const index = currentProjects.findIndex((p) => p.id === projectId);
+      if (index !== -1) {
+        setCurrentProjectIndex(index);
+        setCurrentImageIndex(0);
+        setLightboxOpen(true);
+        document.body.style.overflow = "hidden";
       }
-      if (project.primary_image.url) {
-        return project.primary_image.url;
-      }
-      if (project.primary_image.file_path) {
-        return projectService.getImageUrl(project.primary_image.file_path);
-      }
-    }
-    
-    if (project.images && project.images.length > 0) {
-      const firstImage = project.images[0];
-      if (firstImage.full_url) return firstImage.full_url;
-      if (firstImage.url) return firstImage.url;
-      if (firstImage.file_path) {
-        return projectService.getImageUrl(firstImage.file_path);
-      }
-    }
-    
-    return "/api/placeholder/400/300";
-  };
-
-  const openLightbox = useCallback((index) => {
-    setCurrentIndex(index);
-    setLightboxOpen(true);
-    document.body.style.overflow = "hidden";
-  }, []);
+    },
+    [currentProjects]
+  );
 
   const closeLightbox = useCallback(() => {
     setLightboxOpen(false);
     document.body.style.overflow = "auto";
   }, []);
 
-  const nextProject = useCallback((e) => {
-    if (e) e.stopPropagation();
-    setCurrentIndex((prev) => (prev + 1) % currentProjects.length);
-  }, [currentProjects.length]);
+  // Navigate between projects
+  const nextProject = useCallback(
+    (e) => {
+      if (e) e.stopPropagation();
+      setCurrentProjectIndex((prev) => (prev + 1) % currentProjects.length);
+      setCurrentImageIndex(0);
+    },
+    [currentProjects.length]
+  );
 
-  const prevProject = useCallback((e) => {
-    if (e) e.stopPropagation();
-    setCurrentIndex((prev) => (prev - 1 + currentProjects.length) % currentProjects.length);
-  }, [currentProjects.length]);
+  const prevProject = useCallback(
+    (e) => {
+      if (e) e.stopPropagation();
+      setCurrentProjectIndex(
+        (prev) => (prev - 1 + currentProjects.length) % currentProjects.length
+      );
+      setCurrentImageIndex(0);
+    },
+    [currentProjects.length]
+  );
 
-  // Keyboard navigation
+  // Navigate between images within a project
+  const nextImage = useCallback((e, totalImages) => {
+    if (e) e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev + 1) % totalImages);
+  }, []);
+
+  const prevImage = useCallback((e, totalImages) => {
+    if (e) e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev - 1 + totalImages) % totalImages);
+  }, []);
+
+  // ── Keyboard navigation ──────────────────────────────────────────────────────
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!lightboxOpen) return;
-      if (e.key === "ArrowRight") nextProject();
-      if (e.key === "ArrowLeft") prevProject();
-      if (e.key === "Escape") closeLightbox();
+      const images = currentProjects[currentProjectIndex]
+        ? getAllImagesFromProject(currentProjects[currentProjectIndex])
+        : [];
+
+      switch (e.key) {
+        case "ArrowRight":
+          // If multiple images in project, navigate images; otherwise change project
+          images.length > 1 ? nextImage(e, images.length) : nextProject(e);
+          break;
+        case "ArrowLeft":
+          images.length > 1 ? prevImage(e, images.length) : prevProject(e);
+          break;
+        case "Escape":
+          closeLightbox();
+          break;
+        default:
+          break;
+      }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [lightboxOpen, nextProject, prevProject, closeLightbox]);
+  }, [
+    lightboxOpen,
+    currentProjectIndex,
+    currentProjects,
+    nextProject,
+    prevProject,
+    nextImage,
+    prevImage,
+    closeLightbox
+  ]);
 
-  // Touch swipe
-  const handleTouchStart = (e) => {
-    startX.current = e.touches[0].clientX;
-  };
+  // ── Ensure body overflow is reset on unmount ─────────────────────────────────
 
-  const handleTouchEnd = (e) => {
-    const endX = e.changedTouches[0].clientX;
-    const diff = endX - startX.current;
-    if (Math.abs(diff) > 50) {
-      if (diff > 0) prevProject();
-      else nextProject();
-    }
-  };
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
+
+  // ── Touch swipe ──────────────────────────────────────────────────────────────
+
+  const handleTouchStart = useCallback((e) => {
+    touchStartX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback(
+    (e) => {
+      const diff = e.changedTouches[0].clientX - touchStartX.current;
+      if (Math.abs(diff) > 50) {
+        const images = currentProjects[currentProjectIndex]
+          ? getAllImagesFromProject(currentProjects[currentProjectIndex])
+          : [];
+        if (images.length > 1) {
+          diff > 0 ? prevImage(e, images.length) : nextImage(e, images.length);
+        } else {
+          diff > 0 ? prevProject(e) : nextProject(e);
+        }
+      }
+    },
+    [
+      currentProjectIndex,
+      currentProjects,
+      nextImage,
+      prevImage,
+      nextProject,
+      prevProject
+    ]
+  );
+
+  // ── Derived values ────────────────────────────────────────────────────────────
 
   const groupedProjects = groupByCountry(currentProjects);
-  const currentProject = currentProjects[currentIndex];
+  const currentProject = currentProjects[currentProjectIndex];
+  const currentProjectImages = currentProject
+    ? getAllImagesFromProject(currentProject)
+    : [];
+  const activeImage = currentProjectImages[currentImageIndex];
+
+  // ── Render ───────────────────────────────────────────────────────────────────
 
   if (loading) {
     return (
-      <div className="projects-page">
-        <Navbar />
+      <PageShell>
         <div className="loading-container">
-          <div className="loader"></div>
+          <div className="loader" />
           <p>Loading projects...</p>
         </div>
-      </div>
+      </PageShell>
     );
   }
 
   if (error) {
     return (
-      <div className="projects-page">
-        <Navbar />
+      <PageShell>
         <div className="error-container">
           <div className="error-icon">⚠️</div>
           <h3>Error Loading Projects</h3>
@@ -156,48 +269,33 @@ const ProjectsPage = () => {
             Retry
           </button>
         </div>
-      </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="projects-page">
-      <Navbar />
-
+    <PageShell>
       <section className="projects-header">
         <h1>PROJECTS</h1>
         <p>Studio Installations · Networking · Telecommunications</p>
       </section>
 
+      {/* ── Filters ── */}
       <div className="filters">
-        <button
-          className={filter === "all" ? "active" : ""}
-          onClick={() => setFilter("all")}
-        >
-          All
-        </button>
-        <button
-          className={filter === "studio" ? "active" : ""}
-          onClick={() => setFilter("studio")}
-        >
-          Studios
-        </button>
-        <button
-          className={filter === "network" ? "active" : ""}
-          onClick={() => setFilter("network")}
-        >
-          Networking
-        </button>
-        <button
-          className={filter === "telecom" ? "active" : ""}
-          onClick={() => setFilter("telecom")}
-        >
-          Telecom
-        </button>
+        {FILTERS.map(({ value, label }) => (
+          <button
+            key={value}
+            className={filter === value ? "active" : ""}
+            onClick={() => setFilter(value)}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
+      {/* ── Gallery ── */}
       <div className="gallery">
-        {Object.keys(groupedProjects).length === 0 && (
+        {Object.keys(groupedProjects).length === 0 ? (
           <div className="gallery-empty">
             <div>📷</div>
             <p>No projects found in this category</p>
@@ -205,44 +303,42 @@ const ProjectsPage = () => {
               Refresh
             </button>
           </div>
-        )}
-        
-        {Object.entries(groupedProjects).map(([country, projects]) => (
-          <div key={country} className="country-section">
-            <h2 className="country-title">{country}</h2>
-            <div className="country-grid">
-              {projects.map((project) => {
-                const globalIndex = currentProjects.findIndex(
-                  (p) => p.id === project.id
-                );
-                const imageUrl = getProjectImageUrl(project);
-                
-                return (
+        ) : (
+          Object.entries(groupedProjects).map(([country, projects]) => (
+            <div key={country} className="country-section">
+              <h2 className="country-title">{country}</h2>
+              <div className="country-grid">
+                {projects.map((project) => (
                   <div
                     key={project.id}
                     className="project-card"
-                    onClick={() => openLightbox(globalIndex)}
+                    onClick={() => openLightbox(project.id)}
                   >
-                    <img 
-                      src={imageUrl} 
-                      alt={project.title}
+                    <img
+                      src={getProjectCoverUrl(project)}
+                      alt={project.title || "Project"}
                       onError={(e) => {
-                        console.error(`Failed to load image: ${imageUrl}`);
                         e.target.src = "/api/placeholder/400/300";
                       }}
                     />
                     <div className="overlay">
-                      <h3>{project.title}</h3>
+                      <h3>{project.title || "Untitled Project"}</h3>
                       <p>{project.description || "No description available"}</p>
+                      {project.category && (
+                        <span className="project-category">
+                          {project.category.toUpperCase()}
+                        </span>
+                      )}
                     </div>
                   </div>
-                );
-              })}
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
+      {/* ── Lightbox ── */}
       {lightboxOpen && currentProject && (
         <div
           className="lightbox-overlay"
@@ -253,51 +349,100 @@ const ProjectsPage = () => {
           <button className="nav-btn prev" onClick={prevProject}>
             ❮
           </button>
+
           <div
             className="lightbox-content"
             onClick={(e) => e.stopPropagation()}
           >
-            {currentProject.images && currentProject.images.length > 0 && (
-              <img
-                src={currentProject.images[0].full_url || 
-                     currentProject.images[0].url || 
-                     projectService.getImageUrl(currentProject.images[0].file_path)}
-                alt={currentProject.title}
-                onError={(e) => {
-                  e.target.src = "/api/placeholder/800/600";
-                }}
-              />
-            )}
-            <div className="image-info">
-              <h3>{currentProject.title}</h3>
-              <p>{currentProject.description || "No description available"}</p>
-              <span className="image-category">
-                {currentProject.category?.toUpperCase() || "PROJECT"} ·{" "}
-                {currentProject.country?.toUpperCase() || "UNKNOWN"}
-              </span>
-            </div>
-            {currentProject.images && currentProject.images.length > 1 && (
-              <div className="thumb-strip">
-                {currentProject.images.map((image, index) => (
-                  <img
-                    key={image.id}
-                    src={image.full_url || image.url || projectService.getImageUrl(image.file_path)}
-                    className={`thumb ${index === 0 ? "active" : ""}`}
-                    alt={`Thumbnail ${index + 1}`}
-                    onError={(e) => {
-                      e.target.style.display = "none";
-                    }}
-                  />
-                ))}
+            {currentProjectImages.length > 0 ? (
+              <>
+                {/* Main image */}
+                <img
+                  src={resolveImageUrl(activeImage, "/api/placeholder/800/600")}
+                  alt={`${currentProject.title || "Project"} – image ${
+                    currentImageIndex + 1
+                  } of ${currentProjectImages.length}`}
+                  onError={(e) => {
+                    e.target.src = "/api/placeholder/800/600";
+                  }}
+                />
+
+                {/* Per-image navigation (only when project has multiple images) */}
+                {currentProjectImages.length > 1 && (
+                  <div className="image-nav">
+                    <button
+                      className="image-nav-btn"
+                      onClick={(e) => prevImage(e, currentProjectImages.length)}
+                    >
+                      ‹
+                    </button>
+                    <span className="image-counter">
+                      {currentImageIndex + 1} / {currentProjectImages.length}
+                    </span>
+                    <button
+                      className="image-nav-btn"
+                      onClick={(e) => nextImage(e, currentProjectImages.length)}
+                    >
+                      ›
+                    </button>
+                  </div>
+                )}
+
+                {/* Info */}
+                <div className="image-info">
+                  <h3>{currentProject.title || "Untitled Project"}</h3>
+                  <p>
+                    {currentProject.description || "No description available"}
+                  </p>
+                  <span className="image-category">
+                    {currentProject.category?.toUpperCase() || "PROJECT"} ·{" "}
+                    {currentProject.country?.toUpperCase() || "UNKNOWN"}
+                  </span>
+                  {currentProjectImages.length > 1 && (
+                    <span className="image-count">
+                      {currentProjectImages.length} images
+                    </span>
+                  )}
+                </div>
+
+                {/* Thumbnail strip */}
+                {currentProjectImages.length > 1 && (
+                  <div className="thumb-strip">
+                    {currentProjectImages.map((image, index) => (
+                      <img
+                        key={image.id ?? index}
+                        src={resolveImageUrl(image)}
+                        className={`thumb ${
+                          index === currentImageIndex ? "active" : ""
+                        }`}
+                        alt={`${
+                          currentProject.title || "Project"
+                        } – thumbnail ${index + 1}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCurrentImageIndex(index);
+                        }}
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="lightbox-no-image">
+                <p>No images available for this project.</p>
               </div>
             )}
           </div>
+
           <button className="nav-btn next" onClick={nextProject}>
             ❯
           </button>
         </div>
       )}
-    </div>
+    </PageShell>
   );
 };
 

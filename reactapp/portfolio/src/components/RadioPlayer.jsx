@@ -3,120 +3,133 @@ import "./RadioPlayer.css";
 
 const radioStations = [
   {
+    id: 1,
     name: "Radio Maria 103.1 MHz",
     src: "https://dreamsiteradiocp2.com/proxy/rmmozambique2?mp=/stream",
     country: "Mozambique",
     genre: "Religious"
   },
   {
+    id: 2,
+    name: "RMARIA TETE",
+    src: "http://dreamsiteradiocp7.com:8061/stream?type=http&nocache=7",
+    country: "Mozambique",
+    genre: "Religious"
+  },
+  {
+    id: 3,
     name: "RM ANTENA NACIONAL",
     src: "https://node.stream-africa.com:8443/AntenaNacional",
     country: "Mozambique",
     genre: "News"
   },
   {
+    id: 4,
     name: "Radio Maria Papua New Guinea",
     src: "https://dreamsiteradiocp2.com/proxy/rmpapua2?mp=/stream",
     country: "Papua New Guinea",
     genre: "Religious"
   },
   {
+    id: 5,
     name: "Radio Miramar",
     src: "https://nl.digitalrm.pt:8150/stream",
     country: "Portugal",
     genre: "Variety"
   },
   {
+    id: 6,
     name: "SUPER RM",
     src: "https://c1.mirror.africa:8443/227",
     country: "Mozambique",
     genre: "Pop"
   },
   {
+    id: 7,
     name: "Cabo Delgado FM",
     src: "https://node.stream-africa.com:8443/CaboDelgadoFM",
     country: "Mozambique",
     genre: "Community"
   },
   {
+    id: 8,
     name: "Manica FM",
     src: "https://node.stream-africa.com:8443/ManicaFM",
     country: "Mozambique",
     genre: "Community"
   },
   {
+    id: 9,
     name: "Maputo Corridor FM",
     src: "https://node.stream-africa.com:8443/MaputoCorridor",
     country: "Mozambique",
     genre: "News"
   },
   {
+    id: 10,
     name: "Radio Mocambique Maputo FM",
     src: "https://node.stream-africa.com:8443/MaputoFM",
     country: "Mozambique",
     genre: "Public"
   },
   {
+    id: 11,
     name: "Nampula FM",
     src: "https://node.stream-africa.com:8443/Nampula",
     country: "Mozambique",
     genre: "Community"
   },
   {
+    id: 12,
     name: "Niassa FM",
     src: "https://node.stream-africa.com:8443/NiassaFM",
     country: "Mozambique",
     genre: "Community"
   },
   {
-    name: "Power FM Lusaka",
-    src: "https://node.stream-africa.com:8443/PowerFMLusaka",
-    country: "Zambia",
-    genre: "Pop"
-  },
-  {
+    id: 14,
     name: "RM Desporto",
     src: "https://node.stream-africa.com:8443/RMDesporto",
     country: "Mozambique",
     genre: "Sports"
   },
   {
+    id: 15,
     name: "Radio Cidade Beira",
     src: "https://node.stream-africa.com:8443/RadioCidadeBeira",
     country: "Mozambique",
     genre: "Urban"
   },
   {
+    id: 16,
     name: "Radio Cidade Maputo",
     src: "https://node.stream-africa.com:8443/RadioCidadeMaputo",
     country: "Mozambique",
     genre: "Urban"
   },
   {
+    id: 17,
     name: "Sofala FM",
     src: "https://node.stream-africa.com:8443/Sofala",
     country: "Mozambique",
     genre: "Community"
   },
   {
+    id: 18,
     name: "Zambezi FM",
     src: "https://node.stream-africa.com:8443/ZambeziFM",
     country: "Mozambique",
     genre: "Community"
   },
   {
-    name: "Zambezia FM",
-    src: "https://node.stream-africa.com:8443/ZambeziaFM",
-    country: "Mozambique",
-    genre: "Community"
-  },
-  {
+    id: 20,
     name: "Tete FM",
-    src: "https://node.stream-africa.com:8443/TeteFM",
+    src: "http://dreamsiteradiocp7.com:8061/stream?type=http&nocache=8",
     country: "Mozambique",
     genre: "Community"
   },
   {
+    id: 21,
     name: "LM RADIO",
     src: "https://cast6.asurahosting.com/proxy/lmradioc/stream",
     country: "Mozambique",
@@ -186,7 +199,11 @@ function RadioPlayer() {
     try {
       // Close existing context
       if (analyserRef.current) {
-        analyserRef.current.disconnect();
+        try {
+          analyserRef.current.disconnect();
+        } catch (err) {
+          console.warn("Disconnect error:", err);
+        }
       }
 
       const audioContext = new (window.AudioContext ||
@@ -271,7 +288,7 @@ function RadioPlayer() {
       if (!audioRef.current) return;
 
       // If same station and playing, pause
-      if (currentStation?.src === station.src && isPlaying) {
+      if (currentStation?.id === station.id && isPlaying) {
         await stopPlayback();
         setCurrentStation(null);
         return;
@@ -288,7 +305,7 @@ function RadioPlayer() {
         const audio = audioRef.current;
         audio.src = station.src;
         audio.volume = volume / 100;
-        audio.crossOrigin = "anonymous"; // Try to handle CORS
+        audio.crossOrigin = "anonymous";
 
         // Load the media
         audio.load();
@@ -297,7 +314,7 @@ function RadioPlayer() {
         await new Promise((resolve, reject) => {
           const timeout = setTimeout(
             () => reject(new Error("Load timeout")),
-            10000
+            15000
           );
 
           const canPlayHandler = () => {
@@ -333,7 +350,7 @@ function RadioPlayer() {
 
           // Update recent stations
           setRecentStations((prev) => {
-            const filtered = prev.filter((s) => s.src !== station.src);
+            const filtered = prev.filter((s) => s.id !== station.id);
             return [station, ...filtered].slice(0, 10);
           });
         }
@@ -373,9 +390,9 @@ function RadioPlayer() {
   // Toggle favorite
   const toggleFavorite = useCallback((station) => {
     setFavorites((prev) => {
-      const isFavorite = prev.some((s) => s.src === station.src);
+      const isFavorite = prev.some((s) => s.id === station.id);
       if (isFavorite) {
-        return prev.filter((s) => s.src !== station.src);
+        return prev.filter((s) => s.id !== station.id);
       } else {
         return [...prev, station];
       }
@@ -470,17 +487,17 @@ function RadioPlayer() {
                 </p>
               ) : (
                 favorites.map((station) => (
-                  <div key={station.src} className="station-item favorite-item">
+                  <div key={station.id} className="station-item favorite-item">
                     <button
                       className={`play-station-btn ${
-                        currentStation?.src === station.src && isPlaying
+                        currentStation?.id === station.id && isPlaying
                           ? "playing"
                           : ""
                       }`}
                       onClick={() => playStation(station)}
                       disabled={isLoading}
                     >
-                      {currentStation?.src === station.src && isPlaying
+                      {currentStation?.id === station.id && isPlaying
                         ? "⏸"
                         : "▶"}
                     </button>
@@ -511,17 +528,17 @@ function RadioPlayer() {
                 </p>
               ) : (
                 recentStations.map((station) => (
-                  <div key={station.src} className="station-item recent-item">
+                  <div key={station.id} className="station-item recent-item">
                     <button
                       className={`play-station-btn ${
-                        currentStation?.src === station.src && isPlaying
+                        currentStation?.id === station.id && isPlaying
                           ? "playing"
                           : ""
                       }`}
                       onClick={() => playStation(station)}
                       disabled={isLoading}
                     >
-                      {currentStation?.src === station.src && isPlaying
+                      {currentStation?.id === station.id && isPlaying
                         ? "⏸"
                         : "▶"}
                     </button>
@@ -581,53 +598,69 @@ function RadioPlayer() {
           {error && <div className="error-message">⚠️ {error}</div>}
 
           <div className="stations-grid">
-            {filteredStations.map((station) => (
-              <div key={station.src} className="station-card">
-                <div className="station-card-header">
-                  <div className="station-icon">📻</div>
-                  <button
-                    className={`favorite-btn-card ${
-                      favorites.some((f) => f.src === station.src)
-                        ? "active"
-                        : ""
-                    }`}
-                    onClick={() => toggleFavorite(station)}
-                  >
-                    {favorites.some((f) => f.src === station.src) ? "❤️" : "🤍"}
-                  </button>
-                </div>
-                <div className="station-card-body">
-                  <h3 className="station-card-name">{station.name}</h3>
-                  <div className="station-card-meta">
-                    <span className="genre-tag">{station.genre}</span>
-                    <span className="country-tag">{station.country}</span>
+            {filteredStations.length === 0 ? (
+              <div className="no-stations-found">
+                <p>No stations found matching your criteria</p>
+                <button
+                  onClick={() => {
+                    setSearchTerm("");
+                    setSelectedGenre("All");
+                    setSelectedCountry("All");
+                  }}
+                  className="clear-filters-btn"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            ) : (
+              filteredStations.map((station) => (
+                <div key={station.id} className="station-card">
+                  <div className="station-card-header">
+                    <div className="station-icon">📻</div>
+                    <button
+                      className={`favorite-btn-card ${
+                        favorites.some((f) => f.id === station.id)
+                          ? "active"
+                          : ""
+                      }`}
+                      onClick={() => toggleFavorite(station)}
+                    >
+                      {favorites.some((f) => f.id === station.id) ? "❤️" : "🤍"}
+                    </button>
+                  </div>
+                  <div className="station-card-body">
+                    <h3 className="station-card-name">{station.name}</h3>
+                    <div className="station-card-meta">
+                      <span className="genre-tag">{station.genre}</span>
+                      <span className="country-tag">{station.country}</span>
+                    </div>
+                  </div>
+                  <div className="station-card-footer">
+                    <button
+                      className={`play-btn ${
+                        currentStation?.id === station.id && isPlaying
+                          ? "playing"
+                          : ""
+                      }`}
+                      onClick={() => playStation(station)}
+                      disabled={isLoading}
+                    >
+                      {isLoading && currentStation?.id === station.id
+                        ? "⏳ Loading..."
+                        : currentStation?.id === station.id && isPlaying
+                        ? "⏸ Pause"
+                        : "▶ Play"}
+                    </button>
+                    {currentStation?.id === station.id && isPlaying && (
+                      <div className="playing-indicator">
+                        <span className="pulse-dot"></span>
+                        LIVE
+                      </div>
+                    )}
                   </div>
                 </div>
-                <div className="station-card-footer">
-                  <button
-                    className={`play-btn ${
-                      currentStation?.src === station.src && isPlaying
-                        ? "playing"
-                        : ""
-                    }`}
-                    onClick={() => playStation(station)}
-                    disabled={isLoading}
-                  >
-                    {isLoading && currentStation?.src === station.src
-                      ? "⏳ Loading..."
-                      : currentStation?.src === station.src && isPlaying
-                      ? "⏸ Pause"
-                      : "▶ Play"}
-                  </button>
-                  {currentStation?.src === station.src && isPlaying && (
-                    <div className="playing-indicator">
-                      <span className="pulse-dot"></span>
-                      LIVE
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
